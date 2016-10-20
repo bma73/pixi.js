@@ -64,6 +64,8 @@ Loader._pixiMiddleware = [
     bitmapFontParser,
 ];
 
+Loader.spritesheetNoCache = null;
+
 // Add custom extentions
 const Resource = ResourceLoader.Resource;
 

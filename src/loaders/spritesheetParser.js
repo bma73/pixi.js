@@ -1,6 +1,7 @@
 import { Resource } from 'resource-loader';
 import path from 'path';
 import * as core from '../core';
+import Loader from './loader';
 
 const BATCH_SIZE = 1000;
 
@@ -32,7 +33,10 @@ export default function ()
         }
         else
         {
-            resourcePath = `${path.dirname(resource.url.replace(this.baseUrl, ''))}/${resource.data.meta.image}`;
+            let noCache = '';
+
+            if (Loader.spritesheetNoCache !== null) noCache = `?${Loader.spritesheetNoCache}`;
+            resourcePath = `${path.dirname(resource.url.replace(this.baseUrl, ''))}/${resource.data.meta.image}${noCache}`;
         }
 
         // load the image for this sheet
