@@ -8,8 +8,6 @@ import settings from '../../settings';
 import glCore from 'pixi-gl-core';
 import bitTwiddle from 'bit-twiddle';
 
-const { SPRITE_BATCH_SIZE, SPRITE_MAX_TEXTURES, CAN_UPLOAD_SAME_BUFFER } = settings;
-
 let TICK = 0;
 let TEXTURE_TICK = 0;
 
@@ -46,11 +44,11 @@ export default class SpriteRenderer extends ObjectRenderer
         this.vertByteSize = this.vertSize * 4;
 
         /**
-         * The number of images in the SpriteBatch before it flushes.
+         * The number of images in the SpriteRenderer before it flushes.
          *
          * @member {number}
          */
-        this.size = SPRITE_BATCH_SIZE; // 2000 is a nice balance between mobile / desktop
+        this.size = settings.SPRITE_BATCH_SIZE; // 2000 is a nice balance between mobile / desktop
 
         // the total number of bytes in our batch
         // let numVerts = this.size * 4 * this.vertByteSize;
@@ -106,7 +104,7 @@ export default class SpriteRenderer extends ObjectRenderer
         const gl = this.renderer.gl;
 
         // step 1: first check max textures the GPU can handle.
-        this.MAX_TEXTURES = Math.min(gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS), SPRITE_MAX_TEXTURES);
+        this.MAX_TEXTURES = Math.min(gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS), settings.SPRITE_MAX_TEXTURES);
 
         // step 2: check the maximum number of if statements the shader can have too..
         this.MAX_TEXTURES = checkMaxIfStatmentsInShader(this.MAX_TEXTURES, gl);
@@ -170,7 +168,7 @@ export default class SpriteRenderer extends ObjectRenderer
         // get the uvs for the texture
 
         // if the uvs have not updated then no point rendering just yet!
-        if (!sprite.texture._uvs)
+        if (!sprite._texture._uvs)
         {
             return;
         }
@@ -353,7 +351,7 @@ export default class SpriteRenderer extends ObjectRenderer
             uint32View[index + 12] = uvs[2];
             uint32View[index + 17] = uvs[3];
 
-            uint32View[index + 3] = uint32View[index + 8] = uint32View[index + 13] = uint32View[index + 18] = sprite._tintRGB + (sprite.worldAlpha * 255 << 24);
+            uint32View[index + 3] = uint32View[index + 8] = uint32View[index + 13] = uint32View[index + 18] = sprite._tintRGB + (Math.min(sprite.worldAlpha, 1) * 255 << 24);
 
             float32View[index + 4] = float32View[index + 9] = float32View[index + 14] = float32View[index + 19] = nextTexture._virtalBoundId;
 
@@ -362,10 +360,10 @@ export default class SpriteRenderer extends ObjectRenderer
 
         currentGroup.size = i - currentGroup.start;
 
-        if (!CAN_UPLOAD_SAME_BUFFER)
+        if (!settings.CAN_UPLOAD_SAME_BUFFER)
         {
             // this is still needed for IOS performance..
-            // it really does not like uploading to  the same buffer in a single frame!
+            // it really does not like uploading to the same buffer in a single frame!
             if (this.vaoMax <= this.vertexCount)
             {
                 this.vaoMax++;
@@ -435,7 +433,7 @@ export default class SpriteRenderer extends ObjectRenderer
     {
         this.renderer.bindShader(this.shader);
 
-        if (CAN_UPLOAD_SAME_BUFFER)
+        if (settings.CAN_UPLOAD_SAME_BUFFER)
         {
             // bind buffer #0, we don't need others
             this.renderer.bindVao(this.vaos[this.vertexCount]);
@@ -454,7 +452,7 @@ export default class SpriteRenderer extends ObjectRenderer
     }
 
     /**
-     * Destroys the SpriteBatch.
+     * Destroys the SpriteRenderer.
      *
      */
     destroy()
