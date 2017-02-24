@@ -1,13 +1,6 @@
 import { Resource } from 'resource-loader';
 import path from 'path';
-<<<<<<< HEAD
-import * as core from '../core';
-import Loader from './loader';
-
-const BATCH_SIZE = 1000;
-=======
 import { Spritesheet } from '../core';
->>>>>>> a2fe8d01d2dd713d6940207cb9e846f77ec4e890
 
 export default function ()
 {
