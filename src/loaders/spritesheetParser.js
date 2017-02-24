@@ -1,6 +1,7 @@
 import { Resource } from 'resource-loader';
 import path from 'path';
 import { Spritesheet } from '../core';
+import Loader from './loader';
 
 export default function ()
 {
