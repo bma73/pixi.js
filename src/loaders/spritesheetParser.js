@@ -1,5 +1,5 @@
 import { Resource } from 'resource-loader';
-import path from 'path';
+import url from 'url';
 import { Spritesheet } from '../core';
 import Loader from './loader';
 
@@ -7,7 +7,6 @@ export default function ()
 {
     return function spritesheetParser(resource, next)
     {
-        let resourcePath;
         const imageResourceName = `${resource.name}_image`;
 
         // skip if no data, its not json, it isn't spritesheet data, or the image resource already exists
@@ -29,18 +28,7 @@ export default function ()
             parentResource: resource,
         };
 
-        // Prepend url path unless the resource image is a data url
-        if (resource.isDataUrl)
-        {
-            resourcePath = resource.data.meta.image;
-        }
-        else
-        {
-            let noCache = '';
-
-            if (Loader.spritesheetNoCache !== null) noCache = `?${Loader.spritesheetNoCache}`;
-            resourcePath = `${path.dirname(resource.url.replace(this.baseUrl, ''))}/${resource.data.meta.image}${noCache}`;
-        }
+        const resourcePath = getResourcePath(resource, this.baseUrl);
 
         // load the image for this sheet
         this.add(imageResourceName, resourcePath, loadOptions, function onImageLoad(res)
@@ -59,4 +47,17 @@ export default function ()
             });
         });
     };
+}
+
+export function getResourcePath(resource, baseUrl)
+{
+    // Prepend url path unless the resource image is a data url
+    if (resource.isDataUrl)
+    {
+        return resource.data.meta.image;
+    }
+
+    const noCache = (Loader.spritesheetNoCache !== null) ? `?${Loader.spritesheetNoCache}` : '';
+
+    return `${url.resolve(resource.url.replace(baseUrl, ''), resource.data.meta.image)}${noCache}`;
 }
