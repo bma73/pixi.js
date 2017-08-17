@@ -1,4 +1,5 @@
 import * as core from '../core';
+import { hex2rgb } from '../core/utils';
 
 /**
  * The ParticleContainer class is a really fast version of the Container built solely for speed,
@@ -18,7 +19,7 @@ import * as core from '../core';
  * }
  * ```
  *
- * And here you have a hundred sprites that will be renderer at the speed of light.
+ * And here you have a hundred sprites that will be rendered at the speed of light.
  *
  * @class
  * @extends PIXI.Container
@@ -121,6 +122,18 @@ export default class ParticleContainer extends core.Container
         this.baseTexture = null;
 
         this.setProperties(properties);
+
+        /**
+         * The tint applied to the container.
+         * This is a hex value. A value of 0xFFFFFF will remove any tint effect.
+         *
+         * @private
+         * @member {number}
+         * @default 0xFFFFFF
+         */
+        this._tint = 0;
+        this.tintRgb = new Float32Array(4);
+        this.tint = 0xFFFFFF;
     }
 
     /**
@@ -150,6 +163,24 @@ export default class ParticleContainer extends core.Container
         // TODO don't need to!
         this.displayObjectUpdateTransform();
         //  PIXI.Container.prototype.updateTransform.call( this );
+    }
+
+    /**
+     * The tint applied to the container. This is a hex value.
+     * A value of 0xFFFFFF will remove any tint effect.
+     ** IMPORTANT: This is a webGL only feature and will be ignored by the canvas renderer.
+     * @member {number}
+     * @default 0xFFFFFF
+     */
+    get tint()
+    {
+        return this._tint;
+    }
+
+    set tint(value) // eslint-disable-line require-jsdoc
+    {
+        this._tint = value;
+        hex2rgb(value, this.tintRgb);
     }
 
     /**
