@@ -67,14 +67,14 @@ export default function deprecation(core)
          * @name AssetLoader
          * @memberof PIXI
          * @see PIXI.loaders.Loader
-         * @throws {ReferenceError} The loader system was overhauled in pixi v3,
+         * @throws {ReferenceError} The loader system was overhauled in PixiJS v3,
          * please see the new PIXI.loaders.Loader class.
          * @deprecated since version 3.0.0
          */
         AssetLoader: {
             get()
             {
-                throw new ReferenceError('The loader system was overhauled in pixi v3, '
+                throw new ReferenceError('The loader system was overhauled in PixiJS v3, '
                     + 'please see the new PIXI.loaders.Loader class.');
             },
         },
@@ -564,24 +564,49 @@ export default function deprecation(core)
         },
     });
 
-    Object.defineProperties(extras, {
+    if (extras.AnimatedSprite)
+    {
+        Object.defineProperties(extras, {
 
-        /**
-         * @class
-         * @name MovieClip
-         * @memberof PIXI.extras
-         * @see PIXI.extras.AnimatedSprite
-         * @deprecated since version 4.2.0
-         */
-        MovieClip: {
-            get()
-            {
-                warn('The MovieClip class has been renamed to AnimatedSprite, please use AnimatedSprite from now on.');
+            /**
+             * @class
+             * @name MovieClip
+             * @memberof PIXI.extras
+             * @see PIXI.extras.AnimatedSprite
+             * @deprecated since version 4.2.0
+             */
+            MovieClip: {
+                get()
+                {
+                    warn('The MovieClip class has been renamed to AnimatedSprite, please use AnimatedSprite from now on.');
 
-                return extras.AnimatedSprite;
+                    return extras.AnimatedSprite;
+                },
             },
-        },
-    });
+        });
+    }
+
+    if (extras)
+    {
+        Object.defineProperties(extras, {
+            /**
+             * @class
+             * @name TextureTransform
+             * @memberof PIXI.extras
+             * @see PIXI.TextureMatrix
+             * @deprecated since version 4.6.0
+             */
+            TextureTransform: {
+                get()
+                {
+                    warn('The TextureTransform class has been renamed to TextureMatrix, '
+                        + 'please use PIXI.TextureMatrix from now on.');
+
+                    return core.TextureMatrix;
+                },
+            },
+        });
+    }
 
     core.DisplayObject.prototype.generateTexture = function generateTexture(renderer, scaleMode, resolution)
     {
@@ -596,6 +621,21 @@ export default function deprecation(core)
             + 'Or to render a graphics to a texture using canvas please use generateCanvasTexture');
 
         return this.generateCanvasTexture(scaleMode, resolution);
+    };
+
+    /**
+     * @method
+     * @name PIXI.GroupD8.isSwapWidthHeight
+     * @see PIXI.GroupD8.isVertical
+     * @param {number} rotation - The number to check.
+     * @returns {boolean} Whether or not the direction is vertical
+     * @deprecated since version 4.6.0
+     */
+    core.GroupD8.isSwapWidthHeight = function isSwapWidthHeight(rotation)
+    {
+        warn('GroupD8.isSwapWidthHeight was renamed to GroupD8.isVertical');
+
+        return core.GroupD8.isVertical(rotation);
     };
 
     core.RenderTexture.prototype.render = function render(displayObject, matrix, clear, updateTransform)
@@ -646,18 +686,21 @@ export default function deprecation(core)
         warn('setTexture is now deprecated, please use the texture property, e.g : sprite.texture = texture;');
     };
 
-    /**
-     * @method
-     * @name PIXI.extras.BitmapText#setText
-     * @see PIXI.extras.BitmapText#text
-     * @deprecated since version 3.0.0
-     * @param {string} text - The text to set to.
-     */
-    extras.BitmapText.prototype.setText = function setText(text)
+    if (extras.BitmapText)
     {
-        this.text = text;
-        warn(`setText is now deprecated, please use the text property, e.g : myBitmapText.text = 'my text';`);
-    };
+        /**
+         * @method
+         * @name PIXI.extras.BitmapText#setText
+         * @see PIXI.extras.BitmapText#text
+         * @deprecated since version 3.0.0
+         * @param {string} text - The text to set to.
+         */
+        extras.BitmapText.prototype.setText = function setText(text)
+        {
+            this.text = text;
+            warn(`setText is now deprecated, please use the text property, e.g : myBitmapText.text = 'my text';`);
+        };
+    }
 
     /**
      * @method
@@ -940,6 +983,22 @@ export default function deprecation(core)
                 return core.SpriteMaskFilter;
             },
         },
+
+        /**
+         * @class
+         * @private
+         * @name PIXI.filters.VoidFilter
+         * @see PIXI.filters.AlphaFilter
+         * @deprecated since version 4.5.7
+         */
+        VoidFilter: {
+            get()
+            {
+                warn('VoidFilter has been renamed to AlphaFilter, please use PIXI.filters.AlphaFilter');
+
+                return filters.AlphaFilter;
+            },
+        },
     });
 
     /**
@@ -994,86 +1053,95 @@ export default function deprecation(core)
         },
     });
 
-    /**
-     * @method
-     * @name PIXI.prepare.BasePrepare#register
-     * @see PIXI.prepare.BasePrepare#registerFindHook
-     * @deprecated since version 4.4.2
-     * @param {Function} [addHook] - Function call that takes two parameters: `item:*, queue:Array`
-     *        function must return `true` if it was able to add item to the queue.
-     * @param {Function} [uploadHook] - Function call that takes two parameters: `prepare:CanvasPrepare, item:*` and
-     *        function must return `true` if it was able to handle upload of item.
-     * @return {PIXI.BasePrepare} Instance of plugin for chaining.
-     */
-    prepare.BasePrepare.prototype.register = function register(addHook, uploadHook)
+    if (prepare.BasePrepare)
     {
-        warn('renderer.plugins.prepare.register is now deprecated, '
-            + 'please use renderer.plugins.prepare.registerFindHook & renderer.plugins.prepare.registerUploadHook');
-
-        if (addHook)
+        /**
+         * @method
+         * @name PIXI.prepare.BasePrepare#register
+         * @see PIXI.prepare.BasePrepare#registerFindHook
+         * @deprecated since version 4.4.2
+         * @param {Function} [addHook] - Function call that takes two parameters: `item:*, queue:Array`
+         *        function must return `true` if it was able to add item to the queue.
+         * @param {Function} [uploadHook] - Function call that takes two parameters: `prepare:CanvasPrepare, item:*` and
+         *        function must return `true` if it was able to handle upload of item.
+         * @return {PIXI.BasePrepare} Instance of plugin for chaining.
+         */
+        prepare.BasePrepare.prototype.register = function register(addHook, uploadHook)
         {
-            this.registerFindHook(addHook);
-        }
+            warn('renderer.plugins.prepare.register is now deprecated, '
+                + 'please use renderer.plugins.prepare.registerFindHook & renderer.plugins.prepare.registerUploadHook');
 
-        if (uploadHook)
-        {
-            this.registerUploadHook(uploadHook);
-        }
+            if (addHook)
+            {
+                this.registerFindHook(addHook);
+            }
 
-        return this;
-    };
+            if (uploadHook)
+            {
+                this.registerUploadHook(uploadHook);
+            }
 
-    /**
-     * The number of graphics or textures to upload to the GPU.
-     *
-     * @name PIXI.prepare.canvas.UPLOADS_PER_FRAME
-     * @static
-     * @type {number}
-     * @see PIXI.prepare.BasePrepare.limiter
-     * @deprecated since 4.2.0
-     */
-    Object.defineProperty(prepare.canvas, 'UPLOADS_PER_FRAME', {
-        set()
-        {
-            warn('PIXI.CanvasPrepare.UPLOADS_PER_FRAME has been removed. Please set '
-                + 'renderer.plugins.prepare.limiter.maxItemsPerFrame on your renderer');
-            // because we don't have a reference to the renderer, we can't actually set
-            // the uploads per frame, so we'll have to stick with the warning.
-        },
-        get()
-        {
-            warn('PIXI.CanvasPrepare.UPLOADS_PER_FRAME has been removed. Please use '
-                + 'renderer.plugins.prepare.limiter');
+            return this;
+        };
+    }
 
-            return NaN;
-        },
-    });
+    if (prepare.canvas)
+    {
+        /**
+         * The number of graphics or textures to upload to the GPU.
+         *
+         * @name PIXI.prepare.canvas.UPLOADS_PER_FRAME
+         * @static
+         * @type {number}
+         * @see PIXI.prepare.BasePrepare.limiter
+         * @deprecated since 4.2.0
+         */
+        Object.defineProperty(prepare.canvas, 'UPLOADS_PER_FRAME', {
+            set()
+            {
+                warn('PIXI.CanvasPrepare.UPLOADS_PER_FRAME has been removed. Please set '
+                    + 'renderer.plugins.prepare.limiter.maxItemsPerFrame on your renderer');
+                // because we don't have a reference to the renderer, we can't actually set
+                // the uploads per frame, so we'll have to stick with the warning.
+            },
+            get()
+            {
+                warn('PIXI.CanvasPrepare.UPLOADS_PER_FRAME has been removed. Please use '
+                    + 'renderer.plugins.prepare.limiter');
 
-    /**
-     * The number of graphics or textures to upload to the GPU.
-     *
-     * @name PIXI.prepare.webgl.UPLOADS_PER_FRAME
-     * @static
-     * @type {number}
-     * @see PIXI.prepare.BasePrepare.limiter
-     * @deprecated since 4.2.0
-     */
-    Object.defineProperty(prepare.webgl, 'UPLOADS_PER_FRAME', {
-        set()
-        {
-            warn('PIXI.WebGLPrepare.UPLOADS_PER_FRAME has been removed. Please set '
-                + 'renderer.plugins.prepare.limiter.maxItemsPerFrame on your renderer');
-            // because we don't have a reference to the renderer, we can't actually set
-            // the uploads per frame, so we'll have to stick with the warning.
-        },
-        get()
-        {
-            warn('PIXI.WebGLPrepare.UPLOADS_PER_FRAME has been removed. Please use '
-                + 'renderer.plugins.prepare.limiter');
+                return NaN;
+            },
+        });
+    }
 
-            return NaN;
-        },
-    });
+    if (prepare.webgl)
+    {
+        /**
+         * The number of graphics or textures to upload to the GPU.
+         *
+         * @name PIXI.prepare.webgl.UPLOADS_PER_FRAME
+         * @static
+         * @type {number}
+         * @see PIXI.prepare.BasePrepare.limiter
+         * @deprecated since 4.2.0
+         */
+        Object.defineProperty(prepare.webgl, 'UPLOADS_PER_FRAME', {
+            set()
+            {
+                warn('PIXI.WebGLPrepare.UPLOADS_PER_FRAME has been removed. Please set '
+                    + 'renderer.plugins.prepare.limiter.maxItemsPerFrame on your renderer');
+                // because we don't have a reference to the renderer, we can't actually set
+                // the uploads per frame, so we'll have to stick with the warning.
+            },
+            get()
+            {
+                warn('PIXI.WebGLPrepare.UPLOADS_PER_FRAME has been removed. Please use '
+                    + 'renderer.plugins.prepare.limiter');
+
+                return NaN;
+            },
+        });
+    }
 
     if (loaders.Loader)
     {
@@ -1143,68 +1211,74 @@ export default function deprecation(core)
         });
     }
 
-    /**
-     * @name PIXI.interaction.interactiveTarget#defaultCursor
-     * @static
-     * @type {number}
-     * @see PIXI.interaction.interactiveTarget#cursor
-     * @deprecated since 4.3.0
-     */
-    Object.defineProperty(interaction.interactiveTarget, 'defaultCursor', {
-        set(value)
-        {
-            warn('Property defaultCursor has been replaced with \'cursor\'. ');
-            this.cursor = value;
-        },
-        get()
-        {
-            warn('Property defaultCursor has been replaced with \'cursor\'. ');
+    if (interaction.interactiveTarget)
+    {
+        /**
+         * @name PIXI.interaction.interactiveTarget#defaultCursor
+         * @static
+         * @type {number}
+         * @see PIXI.interaction.interactiveTarget#cursor
+         * @deprecated since 4.3.0
+         */
+        Object.defineProperty(interaction.interactiveTarget, 'defaultCursor', {
+            set(value)
+            {
+                warn('Property defaultCursor has been replaced with \'cursor\'. ');
+                this.cursor = value;
+            },
+            get()
+            {
+                warn('Property defaultCursor has been replaced with \'cursor\'. ');
 
-            return this.cursor;
-        },
-    });
+                return this.cursor;
+            },
+        });
+    }
 
-    /**
-     * @name PIXI.interaction.InteractionManager#defaultCursorStyle
-     * @static
-     * @type {string}
-     * @see PIXI.interaction.InteractionManager#cursorStyles
-     * @deprecated since 4.3.0
-     */
-    Object.defineProperty(interaction.InteractionManager, 'defaultCursorStyle', {
-        set(value)
-        {
-            warn('Property defaultCursorStyle has been replaced with \'cursorStyles.default\'. ');
-            this.cursorStyles.default = value;
-        },
-        get()
-        {
-            warn('Property defaultCursorStyle has been replaced with \'cursorStyles.default\'. ');
+    if (interaction.InteractionManager)
+    {
+        /**
+         * @name PIXI.interaction.InteractionManager#defaultCursorStyle
+         * @static
+         * @type {string}
+         * @see PIXI.interaction.InteractionManager#cursorStyles
+         * @deprecated since 4.3.0
+         */
+        Object.defineProperty(interaction.InteractionManager, 'defaultCursorStyle', {
+            set(value)
+            {
+                warn('Property defaultCursorStyle has been replaced with \'cursorStyles.default\'. ');
+                this.cursorStyles.default = value;
+            },
+            get()
+            {
+                warn('Property defaultCursorStyle has been replaced with \'cursorStyles.default\'. ');
 
-            return this.cursorStyles.default;
-        },
-    });
+                return this.cursorStyles.default;
+            },
+        });
 
-    /**
-     * @name PIXI.interaction.InteractionManager#currentCursorStyle
-     * @static
-     * @type {string}
-     * @see PIXI.interaction.InteractionManager#cursorStyles
-     * @deprecated since 4.3.0
-     */
-    Object.defineProperty(interaction.InteractionManager, 'currentCursorStyle', {
-        set(value)
-        {
-            warn('Property currentCursorStyle has been removed.'
-            + 'See the currentCursorMode property, which works differently.');
-            this.currentCursorMode = value;
-        },
-        get()
-        {
-            warn('Property currentCursorStyle has been removed.'
-            + 'See the currentCursorMode property, which works differently.');
+        /**
+         * @name PIXI.interaction.InteractionManager#currentCursorStyle
+         * @static
+         * @type {string}
+         * @see PIXI.interaction.InteractionManager#cursorStyles
+         * @deprecated since 4.3.0
+         */
+        Object.defineProperty(interaction.InteractionManager, 'currentCursorStyle', {
+            set(value)
+            {
+                warn('Property currentCursorStyle has been removed.'
+                + 'See the currentCursorMode property, which works differently.');
+                this.currentCursorMode = value;
+            },
+            get()
+            {
+                warn('Property currentCursorStyle has been removed.'
+                + 'See the currentCursorMode property, which works differently.');
 
-            return this.currentCursorMode;
-        },
-    });
+                return this.currentCursorMode;
+            },
+        });
+    }
 }
